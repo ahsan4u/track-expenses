@@ -11,7 +11,7 @@ export default function ExpensesClient() {
   const query = useSearchParams();
 
   useEffect(() => {
-    const date = query?.get('date')?.getTime();
+    const date = new Date(query.get('date')).getTime();
     setExpens(JSON.parse(localStorage.getItem(date) || '[]'));
   }, [query]);
 
