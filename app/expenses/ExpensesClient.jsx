@@ -8,18 +8,12 @@ import { useSearchParams } from 'next/navigation';
 export default function ExpensesClient() {
   const [isOpen, setIsOpen] = useState(false);
   const [expens, setExpens] = useState([]);
-  const searchParams = useSearchParams();
-  const dateParam = searchParams ? searchParams.get('date') : null;
+  const query = useSearchParams();
 
   useEffect(() => {
-    const data = JSON.parse(localStorage.getItem('expens') || '[]');
-
-    if (dateParam) {
-      setExpens(data.filter((d) => String(d.date) === String(dateParam)));
-    } else {
-      setExpens(data);
-    }
-  }, [dateParam]);
+    const date = query?.get('date')?.getTime();
+    setExpens(JSON.parse(localStorage.getItem(date) || '[]'));
+  }, [query]);
 
   return (
     <>
