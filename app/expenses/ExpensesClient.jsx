@@ -17,7 +17,7 @@ export default function ExpensesClient() {
 
   return (
     <>
-      <Expense isOpen={isOpen} setIsOpen={setIsOpen} query={searchParams} setExpens={setExpens} />
+      <Expense isOpen={isOpen} setIsOpen={setIsOpen} query={query} setExpens={setExpens} />
       <div className="p-4">
         <div className="space-y-4">
           <div className="flex justify-between text-center bg-[#ffffff11] p-2 rounded-md font-bold">
