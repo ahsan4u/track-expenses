@@ -46,6 +46,7 @@ export function FormMoney({isOpen, setIsOpen}) {
 
 export function Expense({isOpen, setIsOpen, query, setExpens}) {
     const [form, setForm] = useState({ amount: '', reasion: '' });
+    const  {addRecord} = useAppContext();
 
     function setVal(e) {
         const { name, value } = e.target;
@@ -67,14 +68,14 @@ export function Expense({isOpen, setIsOpen, query, setExpens}) {
         const storedRecord = JSON.parse(localStorage.getItem('records') || '[]');
         const updatedRecords = storedRecord.map(r => {
             if(new Date(r.date).getTime() == query.get('date')) {
-                console.log('new remain: ', remain,' ')
                 r.remain = newRemain;
                 return r;
             }
             return r;
         });
-        
+
         localStorage.setItem('records', JSON.stringify(updatedRecords));
+        addRecord();
         setIsOpen(false);
         setForm({ amount: '', reasion: '' });
     }

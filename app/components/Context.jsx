@@ -17,6 +17,7 @@ export function AppProvider({ children }) {
 
     function addRecord(record) {
         const storedRecord = JSON.parse(localStorage.getItem('records') || '[]');
+        if(!record) return setData(storedRecord);
         if (storedRecord.some(r => r.date === record.date)) return;
 
         const updated = [record, ...storedRecord];
