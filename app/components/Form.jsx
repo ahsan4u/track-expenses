@@ -66,7 +66,7 @@ export function Expense({isOpen, setIsOpen, query, setExpens}) {
 
         const storedRecord = JSON.parse(localStorage.getItem('records') || '[]');
         const updatedRecords = storedRecord.map(r => {
-            if(r.date == query.get('date')) {
+            if(new Date(r.date).getTime() == query.get('date')) {
                 console.log('new remain: ', remain,' ')
                 r.remain = newRemain;
                 return r;
