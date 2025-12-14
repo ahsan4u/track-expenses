@@ -12,7 +12,7 @@ export default function ExpensesClient() {
 
   useEffect(() => {
     const date = new Date(query.get('date')).getTime();
-    setExpens(JSON.parse(localStorage.getItem(date) || '[]'));
+    setExpens(JSON.parse(localStorage.getItem(String(date)) || '[]'));
   }, [query]);
 
   return (
