@@ -45,7 +45,7 @@ export function FormMoney({isOpen, setIsOpen}) {
 
 
 export function Expense({isOpen, setIsOpen, query, setExpens}) {
-    const [form, setForm] = useState({ amount: '', reasion: '' });
+    const [form, setForm] = useState({ amount: '', reasion: '', operation: '-' });
     const  {addRecord} = useAppContext();
 
     function setVal(e) {
@@ -57,7 +57,9 @@ export function Expense({isOpen, setIsOpen, query, setExpens}) {
         if (!form.amount || !form.reasion) return;
         const storedExpens = JSON.parse(localStorage.getItem(query.get('date')) || '[]');
         const remain = storedExpens[0]?.remain || query.get('remain');
-        const newRemain = Number(remain)-Number(form.amount);
+        const newRemain = form.operation === '-' 
+            ? Number(remain) - Number(form.amount)
+            : Number(remain) + Number(form.amount);
 
 
         const updatedExpens = {...form, createdAt: String(new Date()), remain: newRemain}
@@ -77,7 +79,7 @@ export function Expense({isOpen, setIsOpen, query, setExpens}) {
         localStorage.setItem('records', JSON.stringify(updatedRecords));
         addRecord();
         setIsOpen(false);
-        setForm({ amount: '', reasion: '' });
+        setForm({ amount: '', reasion: '', operation: '-' });
     }
 
     return (
@@ -85,7 +87,7 @@ export function Expense({isOpen, setIsOpen, query, setExpens}) {
             <button onClick={()=>setIsOpen(false)} className="absolute right-4 top-[10%] px-1.5 bg-red-500 rounded-md"><Plus className={'w-12 rotate-45'}/></button>
             <div className="grow p-4 bg-[#ffffff12] rounded-xl mx-2">
                 <label htmlFor="amt">
-                    <span className="mb-2 block font-bold">Spend Amt:</span>
+                    <span className="mb-2 block font-bold">Amount:</span>
                     <input onChange={setVal} type="number" id="amt" value={form.amount} name="amount" className="border rounded-md p-2 outline-none w-full" />
                 </label>
 
@@ -93,6 +95,34 @@ export function Expense({isOpen, setIsOpen, query, setExpens}) {
                     <span className="mb-2 block font-bold">Label:</span>
                     <input onChange={setVal} type="text" id="reasion" value={form.reasion} name="reasion" className="border rounded-md p-2 outline-none w-full" />
                 </label>
+
+                <div className="mt-4">
+                    <span className="mb-2 block font-bold">Operation:</span>
+                    <div className="flex gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input 
+                                type="radio" 
+                                name="operation" 
+                                value="+" 
+                                checked={form.operation === '+'} 
+                                onChange={setVal}
+                                className="w-4 h-4 cursor-pointer"
+                            />
+                            <span className="text-lg font-semibold">+</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input 
+                                type="radio" 
+                                name="operation" 
+                                value="-" 
+                                checked={form.operation === '-'} 
+                                onChange={setVal}
+                                className="w-4 h-4 cursor-pointer"
+                            />
+                            <span className="text-lg font-semibold">-</span>
+                        </label>
+                    </div>
+                </div>
 
                 <button onClick={handleSubmit} className="w-full py-2 rounded-md bg-blue-600 mt-10">Submit</button>
             </div>
