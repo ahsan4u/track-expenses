@@ -4,14 +4,16 @@ import { useEffect, useState, useRef } from 'react';
 import { Plus } from '../components/Icons';
 import { Expense } from '../components/Form';
 import { useSearchParams } from 'next/navigation';
+import { useAppContext } from '../components/Context';
 
 export default function ExpensesClient() {
   const [isOpen, setIsOpen] = useState(false);
   const [expens, setExpens] = useState([]);
   const [openMenuId, setOpenMenuId] = useState(null);
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState({});
   const [showDetails, setShowDetails] = useState(false);
   const query = useSearchParams();
+  const  {addRecord} = useAppContext();
 
   useEffect(() => {
     setExpens(JSON.parse(localStorage.getItem(query.get('date')) || '[]'));
@@ -31,20 +33,56 @@ export default function ExpensesClient() {
   }, []);
 
   const handleDelete = (idx) => {
-    const updatedExpens = expens.filter((_, i) => i !== idx);
-    setExpens(updatedExpens);
-    localStorage.setItem(query.get('date'), JSON.stringify(updatedExpens));
+    // Remove the deleted item then recompute all remains from base balance
+    const filtered = expens.filter((_, i) => i !== idx);
 
-    // Update remain in records
+    // Base starting balance (before any transactions)
+    const baseRemain = query.get('remain') ? Number(query.get('remain')) : 0;
+
+    if (filtered.length === 0) {
+      // No items left after deletion
+      setExpens([]);
+      localStorage.setItem(query.get('date'), JSON.stringify([]));
+      const storedRecord = JSON.parse(localStorage.getItem('records') || '[]');
+      const updatedRecords = storedRecord.map(r => {
+        if (new Date(r.date).getTime() == query.get('date')) {
+          r.remain = baseRemain;
+          return r;
+        }
+        return r;
+      });
+      localStorage.setItem('records', JSON.stringify(updatedRecords));
+      addRecord();
+      setOpenMenuId(null);
+      return;
+    }
+
+    // Transactions are stored newest-first. Recompute in chronological order (oldest -> newest)
+    const chronological = [...filtered].reverse();
+    let current = baseRemain;
+    const recomputedChron = chronological.map(item => {
+      current = item.operation === '-' ? current - Number(item.amount) : current + Number(item.amount);
+      return { ...item, remain: current };
+    });
+
+    // Back to newest-first order
+    const recomputed = recomputedChron.reverse();
+
+    setExpens(recomputed);
+    localStorage.setItem(query.get('date'), JSON.stringify(recomputed));
+
+    // Update remain in records (top item's remain)
     const storedRecord = JSON.parse(localStorage.getItem('records') || '[]');
+    const finalRemain = recomputed[0].remain;
     const updatedRecords = storedRecord.map(r => {
       if (new Date(r.date).getTime() == query.get('date')) {
-        r.remain = updatedExpens[0]?.remain || query.get('remain');
+        r.remain = finalRemain;
         return r;
       }
       return r;
     });
     localStorage.setItem('records', JSON.stringify(updatedRecords));
+    addRecord();
     setOpenMenuId(null);
   };
 
